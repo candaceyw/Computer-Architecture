@@ -16,13 +16,10 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.pc = 0  # program counter
+
         self.running = False
 
-    def ram_read(self, MAR):
-        return self.ram[MAR]
 
-    def ram_write(self, MAR, MDR):
-        self.ram[MAR] = MDR
 
     def load(self):
         """Load a program into memory."""
@@ -74,22 +71,28 @@ class CPU:
 
         print()
 
+    def ram_read(self, MAR):
+        return self.ram[MAR]
+
+    def ram_write(self, MAR, MDR):
+        self.ram[MAR] = MDR
+
     def run(self):
         """Run the CPU."""
-        # IR = None
+        LDI = 0b10000010
         HLT = 0b00000001
         PRN = 0b01000111
-        LDI = 0b10000010
 
         while self.running:
 
             # Instruction Register
-            instruction = self.ram[self.pc]
+            instruction = self.ram_read(self.pc)
 
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
             if instruction == HLT:
+                print("Operations have been halted")
                 self.running = False
                 self.pc += 1
 
@@ -98,11 +101,10 @@ class CPU:
                 self.pc += 3
 
             elif instruction == PRN:
-                val = self.ram_read(self.pc + 1)
-                print(f"{self.reg[val]} in now in the register")
+                val = self.ram[self.pc + 1]
+                print(self.reg[val])
                 self.pc += 2
-
-            else:
-                print(f"Unknown instruction {instruction}")
-                sys.exit(1)
-
+            #
+            # else:
+            #     print(f"Unknown instruction {instruction}")
+            #     sys.exit(1)
