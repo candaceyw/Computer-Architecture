@@ -5,8 +5,6 @@
 import sys
 from cpu import *
 
-from ls8.cpu import CPU
-
 cpu = CPU()
 
 cpu.load()
