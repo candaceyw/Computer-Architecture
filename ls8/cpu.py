@@ -16,6 +16,7 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.pc = 0  # program counter
+        self.sp = 7
 
         self.running = False
 
@@ -52,7 +53,6 @@ class CPU:
         except FileNotFoundError:
             print(f"{sys.argv[1]} file not found")
             sys.exit(2)
-
 
         # For now, we've just hardcoded a program:
 
@@ -107,6 +107,8 @@ class CPU:
         HLT = 0b00000001
         PRN = 0b01000111
         MUL = 0b10100010
+        POP = 0b01000110
+        PUSH = 0b01000101
 
         running = True
 
@@ -114,6 +116,7 @@ class CPU:
 
             # Instruction Register
             instruction = self.ram_read(self.pc)
+            # sp = self.sp
 
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
@@ -129,11 +132,31 @@ class CPU:
             elif instruction == MUL:  # --> Multiply the values  using ALU
                 # print('MUL')
                 self.alu('MUL', operand_a, operand_b)
-                self.pc+= 3
+                self.pc += 3
 
             elif instruction == PRN:
                 val = self.ram[self.pc + 1]
                 print(self.reg[val])
+                self.pc += 2
+
+            elif instruction == PUSH:
+                # reg == 1st argument
+                reg = self.ram[self.pc + 1]
+                # grab the values we are putting on the reg
+                val = self.reg[reg]
+                # Decrement the SP
+                self.reg[self.sp] -= 1
+                # Copy/write value in given register to address pointed to by SP
+                self.ram[self.reg[self.sp]] = val
+                # Increment PC by 2
+                self.pc += 2
+
+            elif instruction == POP:
+                reg = self.ram[self.pc + 1]  # memory of the register holding our SP
+                val = self.ram[self.reg[self.sp]]  # register number 7
+                self.reg[reg] = val  # copy that value into register that we are pointing at
+                self.reg[self.sp] += 1  # incrememnt the stock pointer:
+                # print(val)
                 self.pc += 2
 
             # else:
